@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
-const user = require('../models/user');
+require('dotenv').config(); // لتحميل متغيرات البيئة من ملف .env
 
 const connectDB = async () => {
     try {
-        await mongoose.connect('mongodb+srv://eshahd637:zzBftImPtRKYiagA@cluster0.tz6evin.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        
+        await mongoose.connect(process.env.MONGO_URI, {
+            useNewUrlParser: true, 
+            useUnifiedTopology: true 
         });
         console.log('MongoDB connected');
     } catch (err) {
@@ -14,4 +13,5 @@ const connectDB = async () => {
         process.exit(1);
     }
 };
+
 module.exports = connectDB;
