@@ -14,14 +14,4 @@ const connectDB = async () => {
         process.exit(1);
     }
 };
-const size = require('./models/size');
-async function insert()
-{
-    await user.create({
-        height:30,
-        weight:5,
-        age:9,
-    });
-}
-insert();
 module.exports = connectDB;
