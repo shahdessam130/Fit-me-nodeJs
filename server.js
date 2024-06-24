@@ -16,6 +16,10 @@ app.use(express.json());
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/userImg', require('./routes/userImg'));
+// توجيه المسار الرئيسي
+app.get('/', (req, res) => {
+    res.send('Welcome to the homepage!');
+});
 
 const PORT = process.env.PORT || 3400;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
