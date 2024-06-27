@@ -9,7 +9,6 @@ const auth = require('../middleware/auth');
 // server.js or app.js
 
 const jwtSecret = process.env.JWT_SECRET;
-
 // Register route
 router.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
