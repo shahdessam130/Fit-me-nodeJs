@@ -10,60 +10,27 @@ const auth = require('../middleware/auth');
 
 const jwtSecret = process.env.JWT_SECRET;
 
-// Registration route
+// Register route
 router.post('/register', async (req, res) => {
-    const { name, email, password ,height,weight,age} = req.body;
+    const { name, email, password } = req.body;
     try {
         let user = await User.findOne({ email });
         if (user) {
-            return res.status(400).json({ msg: 'User already exists' });}
-           
-           
-    user = new User({
-                name,
-                email,
-                password,
-                size: newSize._id 
-            });
-    
-            await user.save(); 
-            const payload = {
-                user: {
-                    id: user.id,
-                },
-            };
-    
-            jwt.sign(
-                payload,
-                jwtSecret, // use environment variable for production
-                { expiresIn: '1h' },
-                (err, token) => {
-                    if (err) throw err;
-                    res.json({ token });
-                }
-            );
-        } catch (err) {
-            console.error(err.message);
-            res.status(500).send('Server error');
+            return res.status(400).json({ msg: 'User already exists' });
         }
-    });
-    
- //size rout
-router.post('/Size', async (req, res) => {
-                const {height,weight,age} = req.body;
-                try {
-                    let user = await User.findOne({ email });
-                    if (user) {
-                        return res.status(400).json({ msg: 'User already exists' });}      
-    // Create a new Size document
-    const newSize = new Size({
-     height,
-     weight,
-     age
-        });
-        await newSize.save();
 
-       
+        // Create a new User document
+        user = new User({
+            name,
+            email,
+            password,
+        });
+
+        // Hash the password before saving the user
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+
+        await user.save();
 
         const payload = {
             user: {
@@ -86,19 +53,48 @@ router.post('/Size', async (req, res) => {
     }
 });
 
-//get Size
-router.get('/Size', auth, async (req, res) => {
+router.post('/size', auth, async (req, res) => {
+    const { height, weight, age } = req.body;
     try {
-        const newSize  = await Size.findById(req.params.id);
-
-        if (!Size) {
-            return res.status(404).json({ msg: 'Size not founded' });
+        // Find the user by ID from the token
+        let user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
         }
 
-        res.json(Size);
+        // Create a new Size document
+        const newSize = new Size({
+            height,
+            weight,
+            age
+        });
+        await newSize.save();
+
+        // Associate the size document with the user
+        user.size = newSize._id;
+        await user.save();
+
+        res.json(newSize);
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(500).send('Server error');
+    }
+});
+
+// GET route to retrieve size information
+router.get('/', auth, async (req, res) => {
+    try {
+        // Find the user by ID from the token
+        let user = await User.findById(req.user.id).populate('size');
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        // Return the user's size information
+        res.json(user.size);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
     }
 });
 
@@ -147,10 +143,8 @@ router.post('/composite-image', auth, async (req, res) => {
             img_url,
             user: req.user.id // Associate with logged-in user
         });
-
         await newCompositeImage.save();
-
-        // Update User document to include new CompositeImage reference
+ // Update User document to include new CompositeImage reference
         await User.findByIdAndUpdate(
             req.user.id,
             { $push: { compositeImages: newCompositeImage._id } },
@@ -165,19 +159,20 @@ router.post('/composite-image', auth, async (req, res) => {
 
 });
 
-//get composit image
+// GET route to retrieve composite images for authenticated user
 router.get('/composite-image', auth, async (req, res) => {
     try {
-        const newCompositeImage = await CompositeImage.findById(req.params.id);
-
-        if (!CompositeImage) {
-            return res.status(404).json({ msg: 'Image not found' });
+        // Find the user by ID from the token and populate compositeImages
+        const user = await User.findById(req.user.id).populate('compositeImages');
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
         }
 
-        res.json(CompositeImage);
+        // Return the user's composite images
+        res.json(user.compositeImages);
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(500).send('Server error');
     }
 });
 
