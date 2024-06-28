@@ -65,7 +65,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ msg: 'Invalid credentials' });
         }
         console.log('Stored Hashed Password:', user.password);
-console.log('Plain Password for Comparison:', password);
+        console.log('Plain Password for Comparison:', password);
 
 
         const isMatch = await bcrypt.compare(password, user.password);
@@ -139,6 +139,8 @@ router.get('/', auth, async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
+
 // Add composite image route
 router.post('/composite-image', auth, async (req, res) => {
     const { composite_ID, img_url } = req.body;
