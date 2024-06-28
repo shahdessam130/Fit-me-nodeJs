@@ -9,6 +9,7 @@ const auth = require('../middleware/auth');
 // server.js or app.js
 
 const jwtSecret = process.env.JWT_SECRET;
+
 // Register route
 router.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
@@ -28,6 +29,9 @@ router.post('/register', async (req, res) => {
         // Hash the password before saving the user
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
+        console.log('Plain Password:', password);
+        console.log('Hashed Password:', user.password);
+        
 
         await user.save();
 
@@ -44,6 +48,45 @@ router.post('/register', async (req, res) => {
             (err, token) => {
                 if (err) throw err;
                 res.json({ token });
+            }
+        );
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+// Login route
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        let user = await User.findOne({ email }).populate('size').populate('compositeImages');
+        if (!user) {
+            console.log('User not found');
+            return res.status(400).json({ msg: 'Invalid credentials' });
+        }
+        console.log('Stored Hashed Password:', user.password);
+console.log('Plain Password for Comparison:', password);
+
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            console.log('Password does not match');
+            return res.status(400).json({ msg: 'Invalid credentials' });
+        }
+
+        const payload = {
+            user: {
+                id: user.id,
+            },
+        };
+
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET, // use environment variable for production
+            { expiresIn: '1h' },
+            (err, token) => {
+                if (err) throw err;
+                res.json({ token ,user});
             }
         );
     } catch (err) {
@@ -96,41 +139,6 @@ router.get('/', auth, async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
-// Login route
-router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-    try {
-        let user = await User.findOne({ email }).populate('size').populate('compositeImages');
-        if (!user) {
-            return res.status(400).json({ msg: 'Invalid credentials' });
-        }
-
-        const isMatch = await user.comparePassword(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ msg: 'Invalid credentials' });
-        }
-
-        const payload = {
-            user: {
-                id: user.id,
-            },
-        };
-
-        jwt.sign(
-            payload,
-            process.env.JWT_SECRET, // use environment variable for production
-            { expiresIn: 3600 },
-            (err, token) => {
-                if (err) throw err;
-                res.json({ token ,user});
-            }
-        );
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
-    }
-});
 // Add composite image route
 router.post('/composite-image', auth, async (req, res) => {
     const { composite_ID, img_url } = req.body;
@@ -142,8 +150,10 @@ router.post('/composite-image', auth, async (req, res) => {
             img_url,
             user: req.user.id // Associate with logged-in user
         });
+
         await newCompositeImage.save();
- // Update User document to include new CompositeImage reference
+
+        // Update User document to include new CompositeImage reference
         await User.findByIdAndUpdate(
             req.user.id,
             { $push: { compositeImages: newCompositeImage._id } },
