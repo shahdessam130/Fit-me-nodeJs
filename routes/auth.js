@@ -6,6 +6,7 @@ const CompositeImage = require('../models/CompositeImage');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth');
+const { v4: uuidv4 } = require('uuid');
 // server.js or app.js
 
 const jwtSecret = process.env.JWT_SECRET;
@@ -148,7 +149,7 @@ router.post('/composite-image', auth, async (req, res) => {
     try {
         // Create a new CompositeImage document
         const newCompositeImage = new CompositeImage({
-            composite_ID,
+            composite_ID:uuidv4(),,
             img_url,
             user: req.user.id // Associate with logged-in user
         });
