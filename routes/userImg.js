@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const UserImg = require('../models/UserImg');
 const User = require('../models/user');
-
+const { v4: uuidv4 } = require('uuid');
 // @route   POST /api/userImg
 // @desc    Add an image for a user
 // @access  Private
@@ -17,6 +17,7 @@ router.post('/', auth, async (req, res) => {
             return res.status(404).json({ msg: 'User not found' });
         }
 
+     const img_id = uuidv4(); // إنشاء معرف فريد جديد للصورة
         const newUserImg = new UserImg({
             img_id,
             url,
