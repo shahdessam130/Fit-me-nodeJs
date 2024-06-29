@@ -4,12 +4,14 @@ const auth = require('../middleware/auth');
 const UserImg = require('../models/UserImg');
 const User = require('../models/user');
 const { v4: uuidv4 } = require('uuid');
+const multer = require('multer');
+const path = require('path');
 // @route   POST /api/userImg
 // @desc    Add an image for a user
 // @access  Private
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
-        cb(null, 'uploads/'); // المجلد الذي سيتم تخزين الملفات فيه
+        cb(null, 'UserUploads/'); // المجلد الذي سيتم تخزين الملفات فيه
     },
     filename: function(req, file, cb) {
         cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
