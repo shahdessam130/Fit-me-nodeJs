@@ -5,6 +5,7 @@ const app = express();
 require('dotenv').config();
 // استدعاء ملف إنشاء مجلد الرفع
 require('./createUploadsDir');
+require('./UserImgUpload.js');
 const jwtSecret = process.env.JWT_SECRET;
 
 // Connect to the database
