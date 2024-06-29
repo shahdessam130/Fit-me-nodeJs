@@ -7,7 +7,19 @@ const { v4: uuidv4 } = require('uuid');
 // @route   POST /api/userImg
 // @desc    Add an image for a user
 // @access  Private
-router.post('/', auth, async (req, res) => {
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, 'uploads/'); // المجلد الذي سيتم تخزين الملفات فيه
+    },
+    filename: function(req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+// تهيئة تحميل الملفات
+const upload = multer({ storage: storage });
+
+router.post('/',[auth, upload.single('img')], async (req, res) => {
     const { img_id, url } = req.body;
 
     try {
