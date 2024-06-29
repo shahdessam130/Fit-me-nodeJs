@@ -54,9 +54,9 @@ router.post('/',[auth, upload.single('img')], async (req, res) => {
 // @route   GET /api/userImg/:id
 // @desc    Get an image by ID
 // @access  Private
-router.get('/:id', auth, async (req, res) => {
+router.get('/', auth, async (req, res) => {
     try {
-        const userImg = await UserImg.findById(req.params.id);
+        const user = await User.findById(req.userImg.id).populate('userImg');
 
         if (!userImg) {
             return res.status(404).json({ msg: 'Image not found' });
