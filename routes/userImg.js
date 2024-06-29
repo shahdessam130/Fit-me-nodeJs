@@ -34,7 +34,7 @@ router.post('/',[auth, upload.single('img')], async (req, res) => {
      const img_id = uuidv4(); // إنشاء معرف فريد جديد للصورة
         const newUserImg = new UserImg({
             img_id,
-            url,
+            url:req.file.path,
             user: req.user.id
         });
 
