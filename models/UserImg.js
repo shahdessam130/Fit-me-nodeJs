@@ -4,7 +4,7 @@ const UserImgSchema = new mongoose.Schema({
     img_id: {
         type: String,
         required: true,
-        unique: true
+        //unique: true
     },
     url: {
         type: String,
