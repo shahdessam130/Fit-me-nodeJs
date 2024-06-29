@@ -3,7 +3,8 @@ const express = require('express');
 const connectDB = require('./config/db');
 const app = express();
 require('dotenv').config();
-
+// استدعاء ملف إنشاء مجلد الرفع
+require('./createUploadsDir');
 const jwtSecret = process.env.JWT_SECRET;
 
 // Connect to the database
@@ -19,8 +20,7 @@ app.use('/api/userImg', require('./routes/userImg'));
 // توجيه المسار الرئيسي
 console.log('Application has started');
 
-// استدعاء ملف إنشاء مجلد الرفع
-require('./createUploadsDir');
+
 
 
 const PORT = process.env.PORT || 3400;
