@@ -19,6 +19,9 @@ app.use('/api/userImg', require('./routes/userImg'));
 // توجيه المسار الرئيسي
 console.log('Application has started');
 
+// استدعاء ملف إنشاء مجلد الرفع
+require('./createUploadsDir');
+
 
 const PORT = process.env.PORT || 3400;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
