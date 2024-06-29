@@ -7,6 +7,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
+const multer = require('multer');
+const path = require('path');
+
 // server.js or app.js
 
 const jwtSecret = process.env.JWT_SECRET;
@@ -141,16 +144,28 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
+// تحديد مجلد التخزين وتعيين اسم الملف
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, 'uploads/'); // المجلد الذي سيتم تخزين الملفات فيه
+    },
+    filename: function(req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+// تهيئة تحميل الملفات
+const upload = multer({ storage: storage });
 
 // Add composite image route
-router.post('/composite-image', auth, async (req, res) => {
+router.post('/composite-image',[auth, upload.single('img')], async (req, res) => {
     const { composite_ID, img_url } = req.body;
 
     try {
         // Create a new CompositeImage document
         const newCompositeImage = new CompositeImage({
-            composite_ID:uuidv4(),,
-            img_url,
+            composite_ID:uuidv4(),
+            img_url:req.file.path,
             user: req.user.id // Associate with logged-in user
         });
 
