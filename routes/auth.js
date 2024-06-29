@@ -163,8 +163,9 @@ router.post('/composite-image',[auth, upload.single('img')], async (req, res) =>
 
     try {
         // Create a new CompositeImage document
+        const composite_ID = uuidv4(); // إنشاء معرف فريد جديد للصورة
         const newCompositeImage = new CompositeImage({
-            composite_ID:uuidv4(),
+            composite_ID,
             img_url:req.file.path,
             user: req.user.id // Associate with logged-in user
         });
